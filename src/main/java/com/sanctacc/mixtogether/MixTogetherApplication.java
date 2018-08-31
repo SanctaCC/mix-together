@@ -22,9 +22,7 @@ public class MixTogetherApplication {
 		Movie movie = new Movie();
 		movie.setUrl("youtube");
 		movie.setOrder(1);
-
 		Code code = new Code();
-		code.setCode("12345");
 		code.setMovies(Collections.singleton(movie));
 		movie.setCode(code);
 		return args -> codeRepository.save(code);
