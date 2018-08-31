@@ -24,5 +24,6 @@ public class Code {
 
     @OneToMany(mappedBy = "code", cascade = {CascadeType.MERGE, CascadeType.PERSIST},
     fetch = FetchType.EAGER, orphanRemoval = true)
+    @OrderBy(value = "order")
     private Set<Movie> movies;
 }
