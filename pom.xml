@@ -82,6 +82,39 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>build-vue</id>
+						<phase>install</phase>
+						<configuration>
+							<tasks>
+								<exec executable="cmd" osfamily="windows"
+									  dir="${project.basedir}/app/">
+									<arg value="/c" />
+									<arg value="yarn build"/>
+								</exec>
+								<exec executable="/bin/sh" osfamily="mac"
+									  dir="${project.basedir}/app/">
+									<arg value="yarn build"  />
+								</exec>
+								<exec executable="/bin/bash" osfamily="unix"
+									  dir="${project.basedir}/app/">
+									<arg value="-c" />
+									<arg value="yarn build" />
+								</exec>
+								<copy todir="${project.basedir}/src/main/resources/static">
+									<fileset dir="${project.basedir}/app/dist"/>
+								</copy>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

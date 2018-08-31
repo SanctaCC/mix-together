@@ -3,8 +3,5 @@
 # Run the application
 
 ```
-./mvnw spring-boot:run
-```
-```
-cd app; yarn install && yarn run serve
+./mvnw install && ./mvnw spring-boot:run
 ```
