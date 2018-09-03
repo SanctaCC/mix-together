@@ -7,6 +7,7 @@ import org.hibernate.id.Configurable;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
+import org.springframework.data.domain.Persistable;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
@@ -24,6 +25,12 @@ public class CodeGenerator implements IdentifierGenerator, Configurable {
 
     @Override
     public Serializable generate(SharedSessionContractImplementor sharedSessionContractImplementor, Object o) throws HibernateException {
+        if (o instanceof Code) {
+            Code o2 = (Code) o;
+            if (!o2.isNew()) {
+                return o2.getCode();
+            }
+        }
         return wordsProvider.randomize(4).stream().map(StringUtils::capitalize).collect(Collectors.joining());
     }
 }
