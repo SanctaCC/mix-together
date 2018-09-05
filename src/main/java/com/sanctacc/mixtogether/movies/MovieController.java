@@ -18,9 +18,14 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @RequestMapping("/api/movies/{code}")
+    @GetMapping("/api/movies/{code}")
     public ResponseEntity<Page<Movie>> moviesByCode(@PathVariable String code, Pageable pageable) {
         return ResponseEntity.ok(movieRepository.findAllByCode(code, pageable));
+    }
+
+    @PostMapping("/api/movies/{code}")
+    public ResponseEntity<Movie> addMovie(@PathVariable String code, @RequestBody Movie movie) {
+        return ResponseEntity.status(201).body(movieService.addMovie(code, movie));
     }
 
     @PutMapping(value = "/api/movies", params ={"id1","id2"})
