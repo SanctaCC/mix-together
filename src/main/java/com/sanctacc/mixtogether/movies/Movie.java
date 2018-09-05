@@ -30,5 +30,5 @@ public class Movie {
     private Code code;
 
     @Column(name = "order_specifier")
-    private double order;
+    private Long order;
 }
