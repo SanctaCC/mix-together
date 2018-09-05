@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -28,7 +29,8 @@ public class MovieService {
         Code codeEntity = codeRepository.getOne(code);
         movie.setCode(codeEntity);
         movie.setOrder(movieRepository.countAllByCode_Code(code)+1);
-        return movieRepository.save(movie);
+        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(Collections.singletonList(movieRepository.save(movie))));
+        return movie;
     }
 
     public void swapTwo(Long id1, Long id2) {

@@ -93,16 +93,16 @@
 								<exec executable="cmd" osfamily="windows"
 									  dir="${project.basedir}/app/">
 									<arg value="/c" />
-									<arg value="yarn build"/>
+									<arg value="yarn install &amp;&amp; yarn build"/>
 								</exec>
 								<exec executable="/bin/sh" osfamily="mac"
 									  dir="${project.basedir}/app/">
-									<arg value="yarn build"  />
+									<arg value="yarn install &amp;&amp; yarn build"  />
 								</exec>
 								<exec executable="/bin/bash" osfamily="unix"
 									  dir="${project.basedir}/app/">
 									<arg value="-c" />
-									<arg value="yarn build" />
+									<arg value="yarn install &amp;&amp; yarn build" />
 								</exec>
 								<copy todir="${project.basedir}/src/main/resources/static">
 									<fileset dir="${project.basedir}/app/dist"/>
