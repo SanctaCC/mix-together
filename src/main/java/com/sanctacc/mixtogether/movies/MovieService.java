@@ -3,6 +3,7 @@ package com.sanctacc.mixtogether.movies;
 import com.sanctacc.mixtogether.movies.code.Code;
 import com.sanctacc.mixtogether.movies.code.CodeRepository;
 import com.sanctacc.mixtogether.movies.events.MovieUpdatedEvent;
+import lombok.Data;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class MovieService {
     public Movie addMovie(String code, Movie movie) {
         Code codeEntity = codeRepository.getOne(code);
         movie.setCode(codeEntity);
-        movie.setOrder(movieRepository.countAllByCode_Code(code)+1);
+        movie.setOrder(movieRepository.countAllByCode_Code(code));
         applicationEventPublisher.publishEvent(new MovieUpdatedEvent(Collections.singletonList(movieRepository.save(movie))));
         return movie;
     }
@@ -44,4 +45,23 @@ public class MovieService {
         movieRepository.saveAll(Arrays.asList(movie1,movie2));
         applicationEventPublisher.publishEvent(new MovieUpdatedEvent(allById));
     }
+
+    public void changePlace(String code, UpdateRequest updateRequest) {
+        List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
+        movieList.get(updateRequest.getStart()).setOrder(updateRequest.getInsertBefore()-1);
+        for (int i=updateRequest.getStart()+1; i < updateRequest.getInsertBefore(); i++) {
+                movieList.get(i).decreaseOrder();
+        }
+        movieRepository.saveAll(movieList);
+        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(movieList));
+    }
+}
+
+@Data
+class UpdateRequest {
+
+    private int start;
+
+    private long insertBefore;
+
 }

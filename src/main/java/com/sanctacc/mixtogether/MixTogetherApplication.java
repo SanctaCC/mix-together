@@ -21,12 +21,12 @@ public class MixTogetherApplication {
 	@Bean
 	public ApplicationRunner runner(CodeRepository codeRepository) {
 		Movie movie = new Movie();
-		movie.setUrl("youtube");
+		movie.setUrl("youtube0");
 		movie.setOrder(1L);
 
 		Movie movie2 = new Movie();
-		movie2.setUrl("youtube");
-		movie2.setOrder(2L);
+		movie2.setUrl("youtube1");
+		movie2.setOrder(0L);
 
 		Code code = new Code();
 		code.setMovies(new HashSet<>(Arrays.asList(movie,movie2)));

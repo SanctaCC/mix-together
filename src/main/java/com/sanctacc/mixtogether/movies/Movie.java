@@ -31,4 +31,8 @@ public class Movie {
 
     @Column(name = "order_specifier")
     private Long order;
+
+    public void decreaseOrder() {
+        order--;
+    }
 }
