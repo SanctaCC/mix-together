@@ -48,12 +48,16 @@ public class MovieService {
 
     public void changePlace(String code, UpdateRequest updateRequest) {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
-        movieList.get(updateRequest.getStart()).setOrder(updateRequest.getInsertBefore()-1);
-        for (int i=updateRequest.getStart()+1; i < updateRequest.getInsertBefore(); i++) {
-                movieList.get(i).decreaseOrder();
-        }
+        changeMoviesOrder(updateRequest, movieList);
         movieRepository.saveAll(movieList);
         applicationEventPublisher.publishEvent(new MovieUpdatedEvent(movieList));
+    }
+
+    void changeMoviesOrder(UpdateRequest updateRequest, List<Movie> movieList) {
+        movieList.get(updateRequest.getStart()).setOrder(updateRequest.getInsertBefore()-1);
+        for (int i=updateRequest.getStart()+1; i < updateRequest.getInsertBefore(); i++) {
+            movieList.get(i).decreaseOrder();
+        }
     }
 }
 
