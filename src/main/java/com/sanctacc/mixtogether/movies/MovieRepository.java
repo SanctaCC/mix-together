@@ -12,5 +12,5 @@ public interface MovieRepository extends JpaRepository<Movie,Long> {
 
     Page<Movie> findAllByCode_Code(String code, Pageable pageable);
 
-    Long countAllByCode_Code(String code);
+    Integer countAllByCode_Code(String code);
 }

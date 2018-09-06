@@ -19,10 +19,10 @@ public class MovieServiceTest {
     @Test
     public void changesMovieOrder() {
         List<Movie> movies = new ArrayList<>();
-        for (long i = 0; i <= 7; i++) {
+        for (int i = 0; i <= 7; i++) {
             Movie movie = new Movie();
             movie.setOrder(i);
-            movie.setId(i+1);
+            movie.setId((long) (i+1));
             movies.add(movie);
         }
         UpdateRequest updateRequest = new UpdateRequest();

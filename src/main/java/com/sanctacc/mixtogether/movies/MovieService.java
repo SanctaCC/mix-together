@@ -66,6 +66,6 @@ class UpdateRequest {
 
     private int start;
 
-    private long insertBefore;
+    private int insertBefore;
 
 }

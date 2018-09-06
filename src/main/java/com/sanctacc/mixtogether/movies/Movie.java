@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Builder
+@Builder()
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +30,7 @@ public class Movie {
     private Code code;
 
     @Column(name = "order_specifier")
-    private Long order;
+    private Integer order;
 
     public void decreaseOrder() {
         order--;
