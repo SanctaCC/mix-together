@@ -16,6 +16,10 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(uniqueConstraints =
+        @UniqueConstraint(columnNames = {"code_code", "order_specifier"}),
+        indexes = @Index(columnList = "code_code")
+)
 public class Movie {
 
     @Id

@@ -17,12 +17,14 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @ConditionalOnResource(resources = "youtube_api")
 @PropertySource(name="yt",encoding="UTF-8",value={"classpath:youtube_api"})
+@Transactional
 @Component
 @Slf4j
 public class YoutubeService {
