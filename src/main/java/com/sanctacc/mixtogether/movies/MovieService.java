@@ -7,20 +7,20 @@ import lombok.Data;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
-@Transactional
 public class MovieService {
 
     private final MovieRepository movieRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final CodeRepository codeRepository;
 
-    public MovieService(MovieRepository movieRepository, ApplicationEventPublisher applicationEventPublisher, CodeRepository codeRepository) {
+    public MovieService(MovieRepository movieRepository, ApplicationEventPublisher applicationEventPublisher,
+                        CodeRepository codeRepository) {
         this.movieRepository = movieRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.codeRepository = codeRepository;
@@ -30,7 +30,7 @@ public class MovieService {
         Code codeEntity = codeRepository.getOne(code);
         movie.setCode(codeEntity);
         movie.setOrder(movieRepository.countAllByCode_Code(code));
-        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(Collections.singletonList(movieRepository.save(movie))));
+        sendEvent(Collections.singletonList(movieRepository.save(movie)));
         return movie;
     }
 
@@ -43,14 +43,27 @@ public class MovieService {
         movie2.setOrder(movie1.getOrder() ^ movie2.getOrder());
         movie1.setOrder(movie1.getOrder() ^ movie2.getOrder());
         movieRepository.saveAll(Arrays.asList(movie1,movie2));
-        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(allById));
+        sendEvent(allById);
     }
 
     public void changePlace(String code, UpdateRequest updateRequest) {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
         changeMoviesOrder(updateRequest, movieList);
         movieRepository.saveAll(movieList);
-        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(movieList));
+        sendEvent(movieList);
+    }
+
+    public List<Movie> shuffle(String code) {
+        List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
+        Collections.shuffle(movieList);
+        IntStream.range(0, movieList.size()).forEach(p->movieList.get(p).setOrder(p));
+        movieRepository.saveAll(movieList);
+        sendEvent(movieList);
+        return movieList;
+    }
+
+    private void sendEvent(List<Movie> movies) {
+        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(movies));
     }
 
     void changeMoviesOrder(UpdateRequest updateRequest, List<Movie> movieList) {

@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/movies")
 public class MovieController {
 
     private final MovieRepository movieRepository;
-
     private final MovieService movieService;
 
     public MovieController(MovieRepository movieRepository, MovieService movieService) {
@@ -19,28 +19,33 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping("/api/movies/{code}")
+    @GetMapping("/{code}")
     public ResponseEntity<Page<Movie>> moviesByCode(@PathVariable String code,
                                                     @PageableDefault(sort = "order") Pageable pageable) {
 
         return ResponseEntity.ok(movieRepository.findAllByCode_Code(code, pageable));
     }
 
-    @PostMapping("/api/movies/{code}")
+    @PostMapping("/{code}")
     public ResponseEntity<Movie> addMovie(@PathVariable String code, @RequestBody Movie movie) {
         return ResponseEntity.status(201).body(movieService.addMovie(code, movie));
     }
 
-    @PutMapping(value = "/api/movies", params ={"id1","id2"})
+    @PutMapping(value = "/", params ={"id1","id2"})
     public ResponseEntity<?> swap(@RequestParam Long id1, @RequestParam Long id2) {
         movieService.swapTwo(id1, id2);
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PutMapping(value = "/api/movies/{code}")
+    @PutMapping(value = "/{code}")
     public ResponseEntity<?> changePlaces(@PathVariable String code, @RequestBody UpdateRequest updateRequest) {
         movieService.changePlace(code,updateRequest);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(value = "/{code}", params = "shuffle")
+    public ResponseEntity<?> shuffle(@PathVariable String code) {
+        return ResponseEntity.ok(movieService.shuffle(code));
     }
 
 }
