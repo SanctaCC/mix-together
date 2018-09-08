@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/movies")
 public class MovieController {
@@ -17,6 +20,11 @@ public class MovieController {
     public MovieController(MovieRepository movieRepository, MovieService movieService) {
         this.movieRepository = movieRepository;
         this.movieService = movieService;
+    }
+
+    @ExceptionHandler(value = IndexOutOfBoundsException.class)
+    public void indexExc(Exception e, HttpServletResponse response) throws IOException {
+        response.sendError(400, "Either code doesn't exits or wrong update request.");
     }
 
     @GetMapping("/{code}")

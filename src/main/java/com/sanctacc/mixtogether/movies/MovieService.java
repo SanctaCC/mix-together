@@ -42,14 +42,14 @@ public class MovieService {
         movie1.setOrder(movie1.getOrder() ^ movie2.getOrder());
         movie2.setOrder(movie1.getOrder() ^ movie2.getOrder());
         movie1.setOrder(movie1.getOrder() ^ movie2.getOrder());
-        movieRepository.saveAll(Arrays.asList(movie1,movie2));
+        movieRepository.batchUpdateRespectingUniqueOrder(Arrays.asList(movie1,movie2));
         sendEvent(allById);
     }
 
     public void changePlace(String code, UpdateRequest updateRequest) {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
         changeMoviesOrder(updateRequest, movieList);
-        movieRepository.saveAll(movieList);
+        movieRepository.batchUpdateRespectingUniqueOrder(movieList);
         sendEvent(movieList);
     }
 
@@ -57,12 +57,15 @@ public class MovieService {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
         Collections.shuffle(movieList);
         IntStream.range(0, movieList.size()).forEach(p->movieList.get(p).setOrder(p));
-        movieRepository.saveAll(movieList);
+        movieRepository.batchUpdateRespectingUniqueOrder(movieList);
         sendEvent(movieList);
         return movieList;
     }
 
     private void sendEvent(List<Movie> movies) {
+        if (movies.isEmpty()) {
+            return;
+        }
         applicationEventPublisher.publishEvent(new MovieUpdatedEvent(movies));
     }
 

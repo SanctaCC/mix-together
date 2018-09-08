@@ -22,7 +22,7 @@ public class MovieUpdatedEventListener {
     public void processCustomerCreatedEvent(MovieUpdatedEvent event) {
         List<Movie> updated = event.getUpdated();
         long codeSize = updated.stream().map(Movie::getCode).map(Code::getCode).distinct().count();
-        if (codeSize != 1) {
+        if (codeSize > 1) {
             String ids = updated.stream().map(Movie::getId).map(Object::toString).collect(Collectors.joining(","));
             throw new DifferentCodesException("Movies: " +ids+ " don't belong to the same playlist");
         }
