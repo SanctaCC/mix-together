@@ -1,18 +1,23 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <form @submit.prevent="createPlaylist">
+      <input type="text" name="code" id="code" v-model="code">
+    </form>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue"
-
 export default {
   name: "home",
-  components: {
-    HelloWorld
+  data() {
+    return {
+      code: ""
+    }
+  },
+  methods: {
+    createPlaylist() {
+      this.$store.dispatch("home/createPlaylist", this.code)
+    }
   }
 }
 </script>
