@@ -60,6 +60,7 @@ public class MovieService {
         Collections.shuffle(movieList);
         for (int i = 0; i < movieList.size(); i++) {
             if (i != movieList.get(i).getOrder()) {
+                movieList.get(i).setOrder(i);
                 changedMovies.add(movieList.get(i));
             }
         }
