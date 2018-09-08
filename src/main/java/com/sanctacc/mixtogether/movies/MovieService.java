@@ -7,10 +7,10 @@ import lombok.Data;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 public class MovieService {
@@ -49,15 +49,21 @@ public class MovieService {
     public void changePlace(String code, UpdateRequest updateRequest) {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
         changeMoviesOrder(updateRequest, movieList);
-        movieRepository.batchUpdateRespectingUniqueOrder(movieList);
+        movieRepository.batchUpdateRespectingUniqueOrder(
+                movieList.subList(updateRequest.getStart(),updateRequest.getInsertBefore()-1));
         sendEvent(movieList);
     }
 
     public List<Movie> shuffle(String code) {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
+        List<Movie> changedMovies = new ArrayList<>(movieList.size());
         Collections.shuffle(movieList);
-        IntStream.range(0, movieList.size()).forEach(p->movieList.get(p).setOrder(p));
-        movieRepository.batchUpdateRespectingUniqueOrder(movieList);
+        for (int i = 0; i < movieList.size(); i++) {
+            if (i != movieList.get(i).getOrder()) {
+                changedMovies.add(movieList.get(i));
+            }
+        }
+        movieRepository.batchUpdateRespectingUniqueOrder(changedMovies);
         sendEvent(movieList);
         return movieList;
     }
