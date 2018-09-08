@@ -1,5 +1,7 @@
 # mix-together
 
+[demo](http://18.222.253.254)
+
 # Run the application
 
 Requirements:

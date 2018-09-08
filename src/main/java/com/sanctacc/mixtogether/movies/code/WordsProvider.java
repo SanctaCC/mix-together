@@ -6,11 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StopWatch;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class WordsProvider {
@@ -20,10 +22,10 @@ public class WordsProvider {
 
     @SneakyThrows
     public WordsProvider() {
-        Path path = new ClassPathResource("/words.txt").getFile().toPath();
+        InputStream inputStream = new ClassPathResource("/words.txt").getInputStream();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        this.words = Files.readAllLines(path);
+        words = new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.toList());
         stopWatch.stop();
         log.info("Reading all lines took: {} ms",stopWatch.getLastTaskTimeMillis());
     }
