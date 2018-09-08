@@ -10,6 +10,8 @@ public interface MovieRepository extends JpaRepository<Movie,Long>, CustomMovieR
 
     List<Movie> findAllByCode_CodeOrderByOrder(String code);
 
+    List<Movie> findAllByCode_CodeAndOrderGreaterThanEqualOrderByOrder(String code, Integer fromOrder);
+
     Page<Movie> findAllByCode_Code(String code, Pageable pageable);
 
     Integer countAllByCode_Code(String code);

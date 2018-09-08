@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/movies")
+@RequestMapping("/api/codes")
 public class MovieController {
 
     private final MovieRepository movieRepository;
@@ -27,33 +27,38 @@ public class MovieController {
         response.sendError(400, "Either code doesn't exits or wrong update request.");
     }
 
-    @GetMapping("/{code}")
+    @GetMapping("/{code}/movies")
     public ResponseEntity<Page<Movie>> moviesByCode(@PathVariable String code,
                                                     @PageableDefault(sort = "order") Pageable pageable) {
 
         return ResponseEntity.ok(movieRepository.findAllByCode_Code(code, pageable));
     }
 
-    @PostMapping("/{code}")
+    @PostMapping("/{code}/movies")
     public ResponseEntity<Movie> addMovie(@PathVariable String code, @RequestBody Movie movie) {
         return ResponseEntity.status(201).body(movieService.addMovie(code, movie));
     }
 
-    @PutMapping(value = "/", params ={"id1","id2"})
+    @PutMapping(value = "/movies", params ={"id1","id2"})
     public ResponseEntity<?> swap(@RequestParam Long id1, @RequestParam Long id2) {
         movieService.swapTwo(id1, id2);
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PutMapping(value = "/{code}")
+    @PutMapping(value = "/{code}/movies")
     public ResponseEntity<?> changePlaces(@PathVariable String code, @RequestBody UpdateRequest updateRequest) {
         movieService.changePlace(code,updateRequest);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "/{code}", params = "shuffle")
+    @PutMapping(value = "/{code}/movies", params = "shuffle")
     public ResponseEntity<?> shuffle(@PathVariable String code) {
         return ResponseEntity.ok(movieService.shuffle(code));
     }
 
+    @DeleteMapping(value="/{code}/movies/{order}")
+    public ResponseEntity<?> delete(@PathVariable String code, @PathVariable Integer order) {
+        movieService.deleteMovie(code, order);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -69,6 +69,16 @@ public class MovieService {
         return movieList;
     }
 
+    public void deleteMovie(String code, Integer order) {
+        List<Movie> movieList =
+                movieRepository.findAllByCode_CodeAndOrderGreaterThanEqualOrderByOrder(code, order);
+        movieRepository.deleteInBatch(Collections.singleton(movieList.get(0)));
+        List<Movie> subList = movieList.subList(1, movieList.size());
+        subList.forEach(Movie::decreaseOrder);
+        movieRepository.saveAll(subList);
+        sendEvent(subList);
+    }
+
     private void sendEvent(List<Movie> movies) {
         if (movies.isEmpty()) {
             return;
