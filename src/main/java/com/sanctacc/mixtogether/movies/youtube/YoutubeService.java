@@ -6,6 +6,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeRequestInitializer;
 import com.google.api.services.youtube.model.PlaylistItem;
+import com.google.api.services.youtube.model.Video;
 import com.sanctacc.mixtogether.movies.Movie;
 import com.sanctacc.mixtogether.movies.MovieRepository;
 import com.sanctacc.mixtogether.movies.code.Code;
@@ -56,12 +57,24 @@ public class YoutubeService {
         List<Movie> movieList = new ArrayList<>(items.size());
         for (int i = 0; i < items.size(); i++) {
             Movie m = Movie.builder().order(currentOrder + i).url(items.get(i).getSnippet().getResourceId().getVideoId())
-                    .code(codeEntity).build();
+                    .title(items.get(i).getSnippet().getTitle()).code(codeEntity).build();
             movieList.add(m);
         }
         stopWatch.start();
         movieRepository.saveAll(movieList); //TODO batch updating
         stopWatch.stop();
         log.info("Saving playlist items in db took: {} ms",stopWatch.getLastTaskTimeMillis());
+    }
+
+    public String getMovieTitle(String id) {
+        try {
+            final List<Video> snippet = YOU_TUBE.videos().list("snippet").setId(id).execute().getItems();
+            return snippet.get(0).getSnippet().getTitle();
+        } catch (IndexOutOfBoundsException e) {
+            throw new YoutubeException("Invalid movie id");
+        } catch (Exception e) {
+            log.warn("{}", e);
+            throw new YoutubeException("Youtube api exception");
+        }
     }
 }

@@ -3,7 +3,9 @@ package com.sanctacc.mixtogether.movies;
 import com.sanctacc.mixtogether.movies.code.Code;
 import com.sanctacc.mixtogether.movies.code.CodeRepository;
 import com.sanctacc.mixtogether.movies.events.MovieUpdatedEvent;
+import com.sanctacc.mixtogether.movies.youtube.YoutubeService;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final CodeRepository codeRepository;
+    @Autowired (required = false)
+    private YoutubeService youtubeService;
 
     public MovieService(MovieRepository movieRepository, ApplicationEventPublisher applicationEventPublisher,
                         CodeRepository codeRepository) {
@@ -30,6 +34,9 @@ public class MovieService {
         Code codeEntity = codeRepository.getOne(code);
         movie.setCode(codeEntity);
         movie.setOrder(movieRepository.countAllByCode_Code(code));
+        if (youtubeService != null) {
+            movie.setTitle(youtubeService.getMovieTitle(movie.getUrl()));
+        }
         sendEvent(Collections.singletonList(movieRepository.save(movie)));
         return movie;
     }
