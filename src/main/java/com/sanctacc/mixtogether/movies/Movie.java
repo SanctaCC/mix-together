@@ -1,8 +1,6 @@
 package com.sanctacc.mixtogether.movies;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import com.sanctacc.mixtogether.movies.code.Code;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +22,7 @@ public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private Long id;
 
     private String url;

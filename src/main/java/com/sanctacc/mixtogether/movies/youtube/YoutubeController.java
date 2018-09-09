@@ -19,7 +19,7 @@ public class YoutubeController {
         this.youtubeService = youtubeService;
     }
 
-    @PostMapping(value = "/api/movies/{code}", params = "playlistId")
+    @PostMapping(value = "/api/codes/{code}/movies", params = "playlistId")
     public ResponseEntity<?> addFromYoutubePlaylist(@PathVariable String code, @RequestParam String playlistId)
             throws IOException {
 
