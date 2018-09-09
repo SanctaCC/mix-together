@@ -19,7 +19,7 @@ public class CodeController {
 
     @PostMapping("/api/codes")
     public ResponseEntity<Code> create(@RequestBody(required = false) Code code) {
-        if (code == null) {
+        if (code == null || code.getCode().isEmpty()) {
             code = new Code();
         }
         Code save = codeRepository.save(code);
