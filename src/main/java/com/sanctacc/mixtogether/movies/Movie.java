@@ -42,6 +42,9 @@ public class Movie {
     @Column(name = "order_specifier")
     private Integer order;
 
+    @Version
+    private long version;
+
     public void decreaseOrder() {
         order--;
     }

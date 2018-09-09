@@ -26,6 +26,6 @@ public class MovieUpdatedEventListener {
             String ids = updated.stream().map(Movie::getId).map(Object::toString).collect(Collectors.joining(","));
             throw new DifferentCodesException("Movies: " +ids+ " don't belong to the same playlist");
         }
-        simpMessagingTemplate.convertAndSend("/code/" + updated.get(0).getCode().getCode(),updated);
+        simpMessagingTemplate.convertAndSend("/topic/code/" + updated.get(0).getCode().getCode(), updated);
     }
 }
