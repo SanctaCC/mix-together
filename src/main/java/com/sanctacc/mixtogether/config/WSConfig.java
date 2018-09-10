@@ -1,4 +1,4 @@
-package com.sanctacc.mixtogether;
+package com.sanctacc.mixtogether.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

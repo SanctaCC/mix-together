@@ -41,6 +41,7 @@ public class MovieService {
         return movie;
     }
 
+    @Deprecated
     public void swapTwo(Long id1, Long id2) {
         List<Movie> allById = movieRepository.findAllById(Arrays.asList(id1, id2));
         assert allById.size() == 2;

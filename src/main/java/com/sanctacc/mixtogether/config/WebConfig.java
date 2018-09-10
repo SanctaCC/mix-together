@@ -1,5 +1,6 @@
-package com.sanctacc.mixtogether;
+package com.sanctacc.mixtogether.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.AppCacheManifestTransformer;
@@ -22,13 +24,12 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
     private final Environment env;
 
-    public WebConfig(Environment env) {
-        this.env = env;
-    }
+    private final LockInterceptor lockInterceptor;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -36,6 +37,11 @@ public class WebConfig implements WebMvcConfigurer {
             registry.addMapping("/**").allowedHeaders("*").allowedMethods("*")
                     .allowedOrigins("*");
         }
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(lockInterceptor).addPathPatterns("/api/codes/**");
     }
 
     private PathResourceResolver getCustomResourceResolver() {
