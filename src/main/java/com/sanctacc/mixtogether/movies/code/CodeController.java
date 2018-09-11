@@ -1,12 +1,15 @@
 package com.sanctacc.mixtogether.movies.code;
 
+import com.sanctacc.mixtogether.movies.MovieController;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
 
 @RestController
 public class CodeController {
@@ -18,13 +21,14 @@ public class CodeController {
     }
 
     @PostMapping("/api/codes")
-    public ResponseEntity<Code> create(@RequestBody(required = false) Code code) {
+    public ResponseEntity<Resource<Code>> create(@RequestBody(required = false) Code code) {
         if (code == null || code.getCode().isEmpty()) {
             code = new Code();
         }
         Code save = codeRepository.save(code);
-        //TODO
-        final URI buildUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{code}").build(save.getCode());
-        return ResponseEntity.created(buildUri).body(codeRepository.save(code));
+        Link link = ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(MovieController.class)
+                .moviesByCode(code.getCode(), Pageable.unpaged(), null)).withRel("movies");
+        Resource<Code> codeResource = new Resource<>(save, link);
+        return ResponseEntity.status(HttpStatus.CREATED).body(codeResource);
     }
 }
