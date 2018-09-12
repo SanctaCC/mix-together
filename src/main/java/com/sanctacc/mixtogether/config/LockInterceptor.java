@@ -51,7 +51,7 @@ public class LockInterceptor implements HandlerInterceptor {
     }
 
     private boolean shouldSkip(HttpServletRequest request, HandlerMethod handler) {
-        return HttpMethod.GET.toString().equals(request.getMethod()) || handler.getBeanType() != MovieController.class;
+        return HttpMethod.GET.toString().equals(request.getMethod());
     }
 
     private String getCode(HttpServletRequest request) {

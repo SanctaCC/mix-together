@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
+@AllArgsConstructor(staticName = "of")
 @EqualsAndHashCode
 public class MovieUpdatedEvent {
 

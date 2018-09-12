@@ -9,15 +9,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
-@Builder()
+@Builder
+@DynamicUpdate
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(uniqueConstraints =
         @UniqueConstraint(columnNames = {"code_code", "order_specifier"}),
         indexes = @Index(columnList = "code_code")

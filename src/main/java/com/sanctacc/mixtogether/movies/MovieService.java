@@ -50,29 +50,25 @@ public class MovieService {
         movie1.setOrder(movie1.getOrder() ^ movie2.getOrder());
         movie2.setOrder(movie1.getOrder() ^ movie2.getOrder());
         movie1.setOrder(movie1.getOrder() ^ movie2.getOrder());
-        movieRepository.batchUpdateRespectingUniqueOrder(Arrays.asList(movie1,movie2));
+        movieRepository.batchUpdateOrdersRespectingUniqueOrder(Arrays.asList(movie1,movie2));
         sendEvent(allById);
     }
 
     public void changePlace(String code, UpdateRequest updateRequest) {
         List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
         changeMoviesOrder(updateRequest, movieList);
-        movieRepository.batchUpdateRespectingUniqueOrder(
+        movieRepository.batchUpdateOrdersRespectingUniqueOrder(
                 movieList.subList(updateRequest.getStart(),updateRequest.getInsertBefore()-1));
         sendEvent(movieList);
     }
 
     public List<Movie> shuffle(String code) {
-        List<Movie> movieList = movieRepository.findAllByCode_CodeOrderByOrder(code);
-        List<Movie> changedMovies = new ArrayList<>(movieList.size());
-        Collections.shuffle(movieList);
-        for (int i = 0; i < movieList.size(); i++) {
-            if (i != movieList.get(i).getOrder()) {
-                movieList.get(i).setOrder(i);
-                changedMovies.add(movieList.get(i));
-            }
+        List<Movie> movieList = movieRepository.findAllByCode_Code(code);
+        if (movieList.isEmpty()) {
+            return Collections.emptyList();
         }
-        movieRepository.batchUpdateRespectingUniqueOrder(changedMovies);
+        Collections.shuffle(movieList);
+        movieRepository.queryUpdateOrders(code, movieList);
         sendEvent(movieList);
         return movieList;
     }
@@ -91,7 +87,12 @@ public class MovieService {
         if (movies.isEmpty()) {
             return;
         }
-        applicationEventPublisher.publishEvent(new MovieUpdatedEvent(movies));
+        applicationEventPublisher.publishEvent(MovieUpdatedEvent.of(movies));
+    }
+
+    private void sendEvent(List<Movie> movies, String code) {
+        movies.forEach(p->p.setCode(new Code(code, null)));
+        sendEvent(movies);
     }
 
     void changeMoviesOrder(UpdateRequest updateRequest, List<Movie> movieList) {

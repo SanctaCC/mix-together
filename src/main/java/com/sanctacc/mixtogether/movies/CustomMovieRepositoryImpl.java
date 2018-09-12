@@ -1,5 +1,6 @@
 package com.sanctacc.mixtogether.movies;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
+@Slf4j
 public class CustomMovieRepositoryImpl implements CustomMovieRepository {
 
     @PersistenceContext
@@ -16,7 +18,7 @@ public class CustomMovieRepositoryImpl implements CustomMovieRepository {
 
     @Override
     @Transactional
-    public void batchUpdateRespectingUniqueOrder(List<Movie> movies) {
+    public void batchUpdateOrdersRespectingUniqueOrder(List<Movie> movies) {
         List<Integer> orders = movies.stream().map(Movie::getOrder).collect(Collectors.toList());
         for (Movie movie: movies) {
             movie.setOrder(null);
@@ -28,4 +30,17 @@ public class CustomMovieRepositoryImpl implements CustomMovieRepository {
             session.merge(movies.get(i));
         }
     }
+
+    @Override
+    @Transactional
+    public void queryUpdateOrders(String code, List<Movie> movies) {
+        session.clear();
+        String HQL = "UPDATE Movie m SET m.order = NULL where m.code.code = ?1";
+        session.createQuery(HQL).setParameter(1, code).executeUpdate();
+        for (int i = 0; i < movies.size(); i++) {
+            movies.get(i).setOrder(i);
+            session.merge(movies.get(i));
+        }
+    }
+
 }
