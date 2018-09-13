@@ -24,7 +24,7 @@ export default new Router({
         import(/* webpackChunkName: "about" */ "./views/About.vue")
     },
     {
-      path: "/player",
+      path: "/player/:code",
       name: "player",
       component: Player
     }

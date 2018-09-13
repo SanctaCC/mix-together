@@ -1,9 +1,8 @@
 package com.sanctacc.mixtogether.config;
 
-import com.sanctacc.mixtogether.movies.MovieController;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.web.method.HandlerMethod;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -22,11 +21,11 @@ public class LockInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (shouldSkip(request, (HandlerMethod) handler)) {
+        String code = getCode(request);
+        if (shouldSkip(request) || StringUtils.isEmpty(code)) {
             return true;
         }
         ReentrantLock newLock = new ReentrantLock(true);
-        String code = getCode(request);
         Lock oldLock = lockMap.putIfAbsent(code, newLock);
         if (oldLock == null) {
             newLock.lock();
@@ -39,10 +38,10 @@ public class LockInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        if (shouldSkip(request, (HandlerMethod) handler)){
+        String code = getCode(request);
+        if (shouldSkip(request) || StringUtils.isEmpty(code)){
             return;
         }
-        String code = getCode(request);
         ReentrantLock lock = lockMap.get(code);
         if (!lock.hasQueuedThreads()) {
             lockMap.remove(code);
@@ -50,8 +49,8 @@ public class LockInterceptor implements HandlerInterceptor {
         lock.unlock();
     }
 
-    private boolean shouldSkip(HttpServletRequest request, HandlerMethod handler) {
-        return HttpMethod.GET.toString().equals(request.getMethod());
+    private boolean shouldSkip(HttpServletRequest request) {
+            return HttpMethod.GET.toString().equals(request.getMethod());
     }
 
     private String getCode(HttpServletRequest request) {

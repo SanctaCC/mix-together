@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    Playlist name: 
     <form @submit.prevent="createPlaylist">
       <input type="text" name="code" id="code" v-model="code">
     </form>
@@ -16,7 +17,11 @@ export default {
   },
   methods: {
     createPlaylist() {
-      this.$store.dispatch("home/createPlaylist", this.code)
+      this.$store.dispatch("home/createPlaylist", this.code).then(data => {
+        console.log(data);
+            }, error => {
+            });
+      this.$router.push({path: '/player/'+this.code})
     }
   }
 }
