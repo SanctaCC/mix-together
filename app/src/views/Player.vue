@@ -57,7 +57,6 @@
                     i++;
                     this.ids.splice(value, 1);
                     this.next();
-                    this.player.play();
                     return;
                 }
                 else if (value <= i % (this.ids.length)) {
