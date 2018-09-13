@@ -7,9 +7,11 @@
         <br>video id: {{videoId}}
         <br/> playlist:
         <div v-for="value in ids">
-        <li v-on:click="switchTo(ids.indexOf(value))">
-            <button v-bind:class="{red: videoId === value}" > {{value}} </button>
-            <button v-on:click="remove(ids.indexOf(value))">X</button></li>
+            <li>
+                <button v-on:click="switchTo(ids.indexOf(value))" v-bind:class="{red: videoId === value}"> {{value}}
+                </button>
+                <button v-on:click="remove(ids.indexOf(value))">X</button>
+            </li>
         </div>
     </div>
 </template>
@@ -51,11 +53,21 @@
                 this.change();
             },
             remove(value) {
+                i++;
                 this.ids.splice(value, 1);
-                this.next();
+                if (value === i% this.ids.length +1) {
+                    this.next();
+                    player.play();
+                }
+                else if (value > i % this.ids.length +1) {
+                    i--;
+                }
+                else {
+                    i++;
+                }
             },
             ready(event) {
-                this.change()
+                this.change();
             }
         }
     }
@@ -64,8 +76,6 @@
 
 <style>
     .red {
-        background-color:red;
+        background-color: red;
     }
-
-
 </style>
