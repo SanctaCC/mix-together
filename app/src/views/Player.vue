@@ -5,7 +5,12 @@
         <button @click.prevent="previous">Previous</button>
         <button @click.prevent="next">Next</button>
         <br>video id: {{videoId}}
-        <br/> queue: {{ids}}
+        <br/> playlist:
+        <div v-for="value in ids">
+        <li v-on:click="switchTo(ids.indexOf(value))">
+            <button v-bind:class="{red: videoId === value}" > {{value}} </button>
+            <button v-on:click="remove(ids.indexOf(value))">X</button></li>
+        </div>
     </div>
 </template>
 
@@ -41,9 +46,26 @@
             paused(event) {
                 console.log(event);
             },
+            switchTo(value) {
+                i = value;
+                this.change();
+            },
+            remove(value) {
+                this.ids.splice(value, 1);
+                this.next();
+            },
             ready(event) {
                 this.change()
             }
         }
     }
 </script>
+
+
+<style>
+    .red {
+        background-color:red;
+    }
+
+
+</style>
