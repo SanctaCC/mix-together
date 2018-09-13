@@ -28,10 +28,10 @@
         },
         methods: {
             change() {
-                this.videoId = this.ids[Math.abs(Math.abs(i % this.ids.length))];
+                this.videoId = this.ids[(i % this.ids.length)];
             },
             previous() {
-                i--;
+                i = Math.abs(i-1);
                 this.change();
             },
             next() {
@@ -53,18 +53,17 @@
                 this.change();
             },
             remove(value) {
-                i++;
-                this.ids.splice(value, 1);
-                if (value === i% this.ids.length +1) {
+                if (value === i% (this.ids.length)) {
+                    i++;
+                    this.ids.splice(value, 1);
                     this.next();
-                    player.play();
+                    this.player.play();
+                    return;
                 }
-                else if (value > i % this.ids.length +1) {
-                    i--;
-                }
-                else {
+                else if (value <= i % (this.ids.length)) {
                     i++;
                 }
+                this.ids.splice(value, 1);
             },
             ready(event) {
                 this.change();
