@@ -9,7 +9,7 @@
         <div v-for="value in ids">
             <li>
                 <button v-on:click="switchTo(value)" v-bind:class="{red: videoId === value.id}">
-                    {{value.title}}
+                    {{ (value.title != undefined)? value.title : value.id}}
                 </button>
                 <button v-on:click="remove(ids.indexOf(value))">X</button>
             </li>
@@ -51,7 +51,7 @@
                 this.videoId = this.ids[(i % this.ids.length)].id;
             },
             previous() {
-                i = Math.abs(i - 1);
+                i = (i-1 <= 0)? this.ids.length : i-1;
                 this.change();
             },
             next() {
@@ -90,7 +90,11 @@
             },
             addMovie() {
                 var id = this.$youtube.getIdFromUrl(this.newVideo);
-                Vue.http.post("http://localhost:8080/api/codes/" + this.code + "/movies", {url: id})
+                Vue.http.post("http://localhost:8080/api/codes/" + this.code + "/movies", {url: id}).then(p=> {
+                    p = p.body;
+                        this.ids.push({id: p.url, order: p.order, title: p.title});
+                    });
+                this.newVideo = '';
             }
         }
 
