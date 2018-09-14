@@ -17,6 +17,7 @@
         <form @submit.prevent="addMovie()">
         <input class="add-movie" v-model="newVideo"> <button> add new</button>
         </form>
+        <button @click.prevent="shuffle">Shuffle</button>
     </div>
 </template>
 
@@ -51,7 +52,7 @@
                 this.videoId = this.ids[(i % this.ids.length)].id;
             },
             previous() {
-                i = (i-1 <= 0)? this.ids.length : i-1;
+                i = (i-1 < 0)? this.ids.length -1 : i-1;
                 this.change();
             },
             next() {
@@ -73,17 +74,19 @@
                 this.change();
             },
             remove(value) {
-                console.log(value);
+                Vue.http.delete("http://localhost:8080/api/codes/" + this.code + "/movies/"+value);
                 if (value === i % (this.ids.length)) {
                     i--;
                     this.ids.splice(value, 1);
+                    this.reorder();
                     this.next();
                     return;
-                }
-                else if (value <= i % (this.ids.length)) {
+                } else if (i > value) {
                     i--;
                 }
                 this.ids.splice(value, 1);
+                this.reorder();
+
             },
             ready(event) {
                 this.change();
@@ -95,6 +98,24 @@
                         this.ids.push({id: p.url, order: p.order, title: p.title});
                     });
                 this.newVideo = '';
+            },
+            reorder() {
+                var j = 0;
+                this.ids.forEach(p=> {
+                    p.order = j++; });
+            },
+            shuffle() {
+                Vue.http.put("http://localhost:8080/api/codes/" + this.code + "/movies?shuffle=abc", {headers: {
+
+                    'Content-Type': 'application/json'
+                }});
+                this.ids = [];
+                Vue.http.get("http://localhost:8080/api/codes/" + this.code + "/movies").then(response => {
+                    var responses = (response.body._embedded.movieResourceList);
+                    responses.forEach(p => {
+                        this.ids.push({id: p.url, order: p.order, title: p.title});
+                    })
+                });
             }
         }
 
