@@ -23,21 +23,34 @@
 
 <script>
     import Vue from "vue"
+    import SockJS from 'sockjs-client'
+    import Stomp  from 'stomp-websocket'
 
     let i = 0;
+    var stompClient;
     export default {
 
         name: "player",
 
         created() {
-            Vue.http.get("http://localhost:8080/api/codes/" + this.code + "/movies").then(response => {
+            var codestring = this.code;
+            Vue.http.get("http://localhost:8080/api/codes/" + codestring + "/movies").then(response => {
                 var responses = (response.body._embedded.movieResourceList);
                 responses.forEach(p => {
                     this.ids.push({id: p.url, order: p.order, title: p.title});
                 })
             });
-
+            var wsUrl = "http://localhost:8080/ws";
+            var socket = new SockJS(wsUrl);
+            stompClient = Stomp.over(socket);
+            stompClient.connect({},function(frame) {
+                stompClient.subscribe("/topic/code/"+codestring, function (message) {
+                    console.log(message);
+                });
+            });
         },
+
+
 
         data() {
             return {

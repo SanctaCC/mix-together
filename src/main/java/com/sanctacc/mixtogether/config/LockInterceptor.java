@@ -56,7 +56,7 @@ public class LockInterceptor implements HandlerInterceptor {
     private String getCode(HttpServletRequest request) {
         Map<String, String> attribute =
                 (HashMap) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        return attribute.get("code");
+        return (attribute == null)? null : attribute.get("code");
     }
 
 }

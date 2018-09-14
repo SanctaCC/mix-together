@@ -12,7 +12,9 @@
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
     "vue-youtube": "^1.2.5",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "sockjs-client": "^1.1.5",
+    "stomp-websocket": "^2.3.4-next"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.1",
