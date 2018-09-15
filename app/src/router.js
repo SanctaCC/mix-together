@@ -25,6 +25,7 @@ export default new Router({
     },
     {
       path: "/player/:code",
+        props: true,
       name: "player",
       component: Player
     }
