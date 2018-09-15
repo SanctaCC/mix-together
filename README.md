@@ -1,6 +1,6 @@
 # mix-together
 
-[demo](http://18.222.253.254)
+[demo](http://ec2-18-222-253-254.us-east-2.compute.amazonaws.com/)
 
 # Run the application
 
