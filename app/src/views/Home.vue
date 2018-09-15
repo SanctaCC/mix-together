@@ -29,7 +29,7 @@
                 }, error => {
                 });
                 this.$router.push({
-                    name: 'player', params: {code: this.code}, query: {slave: this.slave}
+                    name: 'player', params: {code: this.code}, query: {slave:  this.slave.toString()}
                 })
             }
         }

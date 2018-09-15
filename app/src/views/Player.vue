@@ -1,14 +1,24 @@
 <template>
     <div class="main">
-        <div class="player-wrapper">
-            <youtube class="player" :video-id="videoId" @ready="ready" @ended="ended" @playing="playing"
-                     @paused="paused"
-                     :player-vars="{ autoplay: 1 }" v-if="slave"></youtube>
+
+        <youtube class="player" :video-id="videoId" @ready="ready" @playing="onplaying()"
+                 @ended="ended" :player-vars="{autoplay: 1}" v-show="slave == 'true'"></youtube>
+        <div>
+            <input type="range" min="0" max="100"  v-model="volumeSlider"
+                   @change="sendCommand('volume-'+volumeSlider)" v-if="slave =='false'">
+            <div v-if="slave =='false'">
+                <button class="ctrl-btn" id="pause" @click='sendCommand("pause")'> PAUSE
+                </button>
+                <button class="ctrl-btn" id="play" v-on:click='sendCommand("play")' > PLAY
+                </button>
+            </div>
+            <div>
+                <button class="ctrl-btn" @click.prevent="previous">Previous</button>
+                <button class="ctrl-btn" @click.prevent="next">Next</button>
+            </div>
         </div>
-        <button @click.prevent="previous">Previous</button>
-        <button @click.prevent="next">Next</button>
         <br>video id: {{videoId}}
-        <br/> playlist {{code}}
+        <br/> <h5 style="overflow: hidden">{{code}} </h5>
         <div class="playlist-wrapper">
             <div class="btn-div" v-for="value in ids">
                 <button class="movie-btn" v-on:click="switchTo(value)" v-bind:class="{red: videoId == value.id}">
@@ -18,7 +28,6 @@
             </div>
             <form @submit.prevent="addMovie()">
                 <input class="add-movie" v-model="newVideoInput" placeholder="youtube video or playlist url">
-                <br>
                 <button> add new</button>
             </form>
             <button @click.prevent="shuffle">Shuffle</button>
@@ -45,56 +54,92 @@
                     this.ids.push({id: p.url, order: p.order, title: p.title});
                 })
             });
-            this.initWS();
+            if (this.slave == 'true')
+                this.initWS();
         },
-
-
         data() {
             return {
                 code: this.$route.params.code,
                 slave: this.$route.query.slave,
                 videoId: "",
                 ids: [],
-                newVideoInput: ""
+                newVideoInput: "",
+                volumeSlider : 100
             }
         },
         methods: {
             initWS() {
-                var wsUrl = "/ws";
+                var wsUrl = "http://localhost:8080/ws";
                 var socket = new SockJS(wsUrl);
                 stompClient = Stomp.over(socket);
                 let code = this.code;
-                var slave = this.slave;
                 var ids = this.ids;
+                let outerThis = this;
                 stompClient.connect({}, function (frame) {
                     stompClient.subscribe("/topic/code/" + code, function (message) {
                         var response = JSON.parse(message.body);
-                        if (slave == 'true') {
+                        if (!response.command)
                             response.forEach(p => {
                                 ids.splice(p.order, 1, {id: p.url, order: p.order, title: p.title});
                             });
+                        else {
+                            switch (response.command) {
+                                case "next":
+                                    outerThis.next();
+                                    break;
+                                case "previous":
+                                    outerThis.previous();
+                                    break;
+                                case "play":
+                                    outerThis.play();
+                                    break;
+                                case "pause":
+                                    outerThis.pause();
+                                    break;
+                                case  /^volume/.test(response.command) && response.command:
+                                    outerThis.changeVolume(response.command.split('-')[1]);
+                                    break;
+                            }
                         }
                     });
-                });
+                }, this);
             },
-
+            sendCommand: function (command) {
+                if (this.slave == 'true') return;
+                return Vue.http.post("http://localhost:8080/api/codes/" + this.code + "/movies?command=" + command);
+            },
+            changeVolume(val) {
+                this.player.setVolume(val);
+            },
             change() {
                 this.videoId = this.ids[(i % this.ids.length)].id;
             },
             previous() {
+                this.sendCommand("previous");
                 i = (i - 1 < 0) ? this.ids.length - 1 : i - 1;
                 this.change();
             },
             next() {
+                this.sendCommand("next");
                 i++;
                 this.change();
             },
             ended(event) {
                 this.next();
             },
-            playing(event) {
+            pause() {
+                this.player.pauseVideo();
             },
-            paused(event) {
+            play() {
+                this.player.playVideo();
+            },
+            stop() {
+                this.player.stopVideo();
+            },
+            onplaying() {
+                if (this.slave == 'false') {
+                    this.stop();
+                }
             },
             switchTo(value) {
                 i = value.order;
@@ -113,9 +158,9 @@
                 }
                 this.ids.splice(value, 1);
                 this.reorder();
-
             },
             ready(event) {
+                this.player = event;
                 this.change();
             },
             addMovie() {
@@ -173,14 +218,9 @@
         width: 100%;
     }
 
-    .player-wrapper {
-    }
-
-    .playlist-wrapper {
-    }
-
     .add-movie {
         width: 100%;
+        box-sizing: border-box;
     }
 
     .movie-btn {
@@ -193,5 +233,10 @@
 
     .btn-div {
         display: flex;
+    }
+
+    .ctrl-btn {
+        width: 50%;
+        min-height: 60px;
     }
 </style>
