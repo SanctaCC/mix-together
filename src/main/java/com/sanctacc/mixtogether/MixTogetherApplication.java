@@ -3,6 +3,7 @@ package com.sanctacc.mixtogether;
 import com.sanctacc.mixtogether.movies.code.Code;
 import com.sanctacc.mixtogether.movies.code.CodeRepository;
 import com.sanctacc.mixtogether.movies.youtube.YoutubeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,6 +22,7 @@ import java.io.IOException;
 @SpringBootApplication
 @EnableSwagger2
 @Configuration
+@Slf4j
 public class MixTogetherApplication {
 
 	public static void main(String[] args) {
@@ -34,11 +36,11 @@ public class MixTogetherApplication {
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor executorPool() {
+	public ThreadPoolTaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor tpte = new ThreadPoolTaskExecutor();
 		tpte.setThreadNamePrefix("nio executor");
 		tpte.setCorePoolSize(2);
-		tpte.setMaxPoolSize(10);
+		tpte.setMaxPoolSize(100);
 		tpte.initialize();
 		return tpte;
 	}
@@ -53,19 +55,20 @@ public class MixTogetherApplication {
 	@Bean
 	@ConditionalOnBean(value = YoutubeService.class)
 	public ApplicationRunner runner2(CodeRepository codeRepository, YoutubeService youtubeService,
-									 ThreadPoolTaskExecutor executorPool) {
+									 ThreadPoolTaskExecutor taskExecutor) {
 
 		Runnable run = () -> {
             Code code = new Code();
             codeRepository.save(code);
 			try {
 				youtubeService.addMoviesFromYTPlaylistId(code.getCode(), "PLjv48fZt_9Zy0yDzmjV9GUMPI-cX0WkDB");
+				log.info("initialized {} ", code.getCode());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		};
 
-		return args -> executorPool.execute(run);
+		return args -> taskExecutor.execute(run);
 	}
 
 }
