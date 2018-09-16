@@ -2,6 +2,7 @@ import Vue from "vue"
 import Router from "vue-router"
 import Home from "./views/Home.vue"
 import Player from "./views/Player.vue"
+import Remote from "./views/Remote.vue"
 
 Vue.use(Router)
 
@@ -24,10 +25,15 @@ export default new Router({
         import(/* webpackChunkName: "about" */ "./views/About.vue")
     },
     {
-      path: "/player/:code",
-        props: true,
+      path: "/code/:code/slave",
+        params:true,
       name: "player",
       component: Player
-    }
+    },
+      {
+        path: "/code/:code/master",
+          name: "remote",
+          component: Remote
+      }
   ]
 })

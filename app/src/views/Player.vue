@@ -1,23 +1,15 @@
 <template>
     <div class="main">
 
-        <youtube class="player" :video-id="videoId" @ready="ready" @playing="onplaying()"
-                 @ended="ended" :player-vars="{autoplay: 1}" v-show="slave == 'true'"></youtube>
+        <youtube class="player" :video-id="videoId" @ready="ready"
+                 @ended="ended" :player-vars="{autoplay: 1}"></youtube>
         <div>
-            <input type="range" min="0" max="100"  v-model="volumeSlider"
-                   @change="sendCommand('volume-'+volumeSlider)" v-if="slave =='false'">
-            <div v-if="slave =='false'">
-                <button class="ctrl-btn" id="pause" @click='sendCommand("pause")'> PAUSE
-                </button>
-                <button class="ctrl-btn" id="play" v-on:click='sendCommand("play")' > PLAY
-                </button>
-            </div>
             <div>
                 <button class="ctrl-btn" @click.prevent="previous">Previous</button>
                 <button class="ctrl-btn" @click.prevent="next">Next</button>
             </div>
         </div>
-        <br>video id: {{videoId}}
+        video id: {{videoId}}
         <br/> <h5 style="overflow: hidden">{{code}} </h5>
         <div class="playlist-wrapper">
             <div class="btn-div" v-for="value in ids">
@@ -54,17 +46,13 @@
                     this.ids.push({id: p.url, order: p.order, title: p.title});
                 })
             });
-            if (this.slave == 'true')
-                this.initWS();
         },
         data() {
             return {
                 code: this.$route.params.code,
-                slave: this.$route.query.slave,
                 videoId: "",
                 ids: [],
                 newVideoInput: "",
-                volumeSlider : 100
             }
         },
         methods: {
@@ -73,14 +61,13 @@
                 var socket = new SockJS(wsUrl);
                 stompClient = Stomp.over(socket);
                 let code = this.code;
-                var ids = this.ids;
                 let outerThis = this;
-                stompClient.connect({}, function (frame) {
+                stompClient.connect({code: code}, function (frame) {
                     stompClient.subscribe("/topic/code/" + code, function (message) {
                         var response = JSON.parse(message.body);
                         if (!response.command)
                             response.forEach(p => {
-                                ids.splice(p.order, 1, {id: p.url, order: p.order, title: p.title});
+                                outerThis.ids.splice(p.order, 1, {id: p.url, order: p.order, title: p.title});
                             });
                         else {
                             switch (response.command) {
@@ -99,14 +86,14 @@
                                 case  /^volume/.test(response.command) && response.command:
                                     outerThis.changeVolume(response.command.split('-')[1]);
                                     break;
+                                case /^switch/.test(response.command) && response.command:
+                                    if (outerThis.ids.length == 0) return;
+                                    outerThis.switchTo({order:response.command.split('-')[1]});
+                                    break;
                             }
                         }
                     });
                 }, this);
-            },
-            sendCommand: function (command) {
-                if (this.slave == 'true') return;
-                return Vue.http.post("http://localhost:8080/api/codes/" + this.code + "/movies?command=" + command);
             },
             changeVolume(val) {
                 this.player.setVolume(val);
@@ -115,12 +102,10 @@
                 this.videoId = this.ids[(i % this.ids.length)].id;
             },
             previous() {
-                this.sendCommand("previous");
                 i = (i - 1 < 0) ? this.ids.length - 1 : i - 1;
                 this.change();
             },
             next() {
-                this.sendCommand("next");
                 i++;
                 this.change();
             },
@@ -136,17 +121,13 @@
             stop() {
                 this.player.stopVideo();
             },
-            onplaying() {
-                if (this.slave == 'false') {
-                    this.stop();
-                }
-            },
             switchTo(value) {
                 i = value.order;
                 this.change();
             },
             remove(value) {
-                Vue.http.delete("http://localhost:8080/api/codes/" + this.code + "/movies/" + value);
+                Vue.http.delete(
+                    "http://localhost:8080/api/codes/" + this.code + "/movies/" + value);
                 if (value === i % (this.ids.length)) {
                     i--;
                     this.ids.splice(value, 1);
@@ -161,15 +142,25 @@
             },
             ready(event) {
                 this.player = event;
-                this.change();
+                if (this.ids.length != 0)
+                    this.change();
+                this.initWS();
             },
             addMovie() {
                 var id = this.$youtube.getIdFromUrl(this.newVideoInput);
-                Vue.http.post("http://localhost:8080/api/codes/" + this.code + "/movies", {url: id}).then(p => {
-                    p = p.body;
-                    if (this.slave == 'false')
-                        this.ids.push({id: p.url, order: p.order, title: p.title});
-                });
+                var reg = /[&?]list=([^&]+)/i
+                var playlistId = (reg.exec(this.newVideoInput)[1]);
+                if (id)
+                    Vue.http.post(
+                        "http://localhost:8080/api/codes/" + this.code + "/movies", {url: id}).then(p => {});
+                else if (playlistId) {
+                    Vue.http.post(
+                        "http://localhost:8080/api/codes/" + this.code + "/movies?playlistId=" + playlistId, {params: {playlistId}}, {
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(p => {});
+                }
                 this.newVideoInput = '';
             },
             reorder() {
@@ -179,23 +170,12 @@
                 });
             },
             shuffle() {
-                Vue.http.put("http://localhost:8080/api/codes/" + this.code + "/movies?shuffle=abc", {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (this.slave == 'false') {
-                    this.ids = [];
-                    Vue.http.get("http://localhost:8080/api/codes/" + this.code + "/movies").then(response => {
-                        var responses = (response.body._embedded.movieResourceList);
-                        responses.forEach(p => {
-                            if (this.videoId === p.url) {
-                                i = p.order
-                            }
-                            this.ids.push({id: p.url, order: p.order, title: p.title});
-                        })
+                Vue.http.put(
+                    "http://localhost:8080/api/codes/" + this.code + "/movies?shuffle=abc", {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
                     });
-                }
             }
         }
 

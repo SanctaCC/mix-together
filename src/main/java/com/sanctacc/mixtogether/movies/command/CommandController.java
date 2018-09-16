@@ -17,7 +17,7 @@ public class CommandController {
     private final SimpMessagingTemplate brokerMessagingTemplate;
 
     @PostMapping(params = "command")
-    public ResponseEntity<?> commandPlay(@PathVariable String code, @RequestParam String command)  {
+    public ResponseEntity<?> command(@PathVariable String code, @RequestParam String command)  {
         brokerMessagingTemplate.convertAndSend("/topic/code/"+code,
                 Collections.singletonMap("command", command));
         return ResponseEntity.ok().build();

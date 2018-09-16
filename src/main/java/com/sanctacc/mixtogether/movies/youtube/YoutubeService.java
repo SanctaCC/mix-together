@@ -11,9 +11,11 @@ import com.sanctacc.mixtogether.movies.Movie;
 import com.sanctacc.mixtogether.movies.MovieRepository;
 import com.sanctacc.mixtogether.movies.code.Code;
 import com.sanctacc.mixtogether.movies.code.CodeRepository;
+import com.sanctacc.mixtogether.movies.events.MovieUpdatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -35,11 +37,13 @@ public class YoutubeService {
     private final YouTube YOU_TUBE;
     private final CodeRepository codeRepository;
     private final MovieRepository movieRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public YoutubeService(CodeRepository codeRepository, MovieRepository movieRepository,
-                          @Value("${youtube.api_key}") String api_key) {
+                          @Value("${youtube.api_key}") String api_key, ApplicationEventPublisher eventPublisher) {
         this.codeRepository = codeRepository;
         this.movieRepository = movieRepository;
+        this.eventPublisher = eventPublisher;
         this.YOU_TUBE = new YouTube.Builder(new NetHttpTransport(), JSON_FACTORY, httpRequest -> {
         }).setYouTubeRequestInitializer(new YouTubeRequestInitializer(api_key)).
                         setApplicationName(APPLICATION_NAME).build();
@@ -61,9 +65,10 @@ public class YoutubeService {
             movieList.add(m);
         }
         stopWatch.start();
-        movieRepository.saveAll(movieList); //TODO batch updating
+        movieRepository.saveAll(movieList);
         stopWatch.stop();
         log.info("Saving playlist items in db took: {} ms",stopWatch.getLastTaskTimeMillis());
+        eventPublisher.publishEvent(MovieUpdatedEvent.of(movieList));
     }
 
     public String getMovieTitle(String id) {

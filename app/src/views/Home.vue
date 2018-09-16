@@ -28,9 +28,14 @@
                     console.log(data);
                 }, error => {
                 });
-                this.$router.push({
-                    name: 'player', params: {code: this.code}, query: {slave:  this.slave.toString()}
-                })
+                if (this.slave)
+                    this.$router.push({
+                        name: 'player', params: {code: this.code}
+                    })
+                else
+                    this.$router.push({
+                        name: 'remote', params: {code: this.code}
+                    })
             }
         }
     }
