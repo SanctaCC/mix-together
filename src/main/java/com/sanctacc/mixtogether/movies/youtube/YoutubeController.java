@@ -23,7 +23,6 @@ public class YoutubeController {
     public ResponseEntity<?> addFromYoutubePlaylist(@PathVariable String code, @RequestParam String playlistId)
             throws IOException {
 
-        youtubeService.addMoviesFromYTPlaylistId(code, playlistId);
-        return ResponseEntity.status(201).build();
+        return ResponseEntity.status(201).body(youtubeService.addMoviesFromYTPlaylistId(code, playlistId));
     }
 }

@@ -23,19 +23,28 @@
             }
         },
         methods: {
-            createPlaylist() {
-                this.$store.dispatch("home/createPlaylist", this.code).then(data => {
-                    console.log(data);
-                }, error => {
-                });
+            continue(result) {
+
                 if (this.slave)
                     this.$router.push({
-                        name: 'player', params: {code: this.code}
+                        name: 'player', params: {code: result}
                     })
                 else
                     this.$router.push({
-                        name: 'remote', params: {code: this.code}
+                        name: 'remote', params: {code: result}
                     })
+            },
+            createPlaylist() {
+                this.$store.dispatch("home/createPlaylist", this.code).then(response => {
+                    if (!response)
+                        this.continue(this.code);
+                    else
+                        this.continue(response.body.code);
+
+                        }, error => {
+                    this.continue(this.code);
+                });
+
             }
         }
     }

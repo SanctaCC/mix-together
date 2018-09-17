@@ -49,7 +49,7 @@ public class YoutubeService {
                         setApplicationName(APPLICATION_NAME).build();
     }
 
-    public void addMoviesFromYTPlaylistId(String code, String playlistId) throws IOException {
+    public List<Movie> addMoviesFromYTPlaylistId(String code, String playlistId) throws IOException {
         StopWatch stopWatch = new StopWatch();
         Code codeEntity = codeRepository.getOne(code);
         stopWatch.start();
@@ -69,6 +69,7 @@ public class YoutubeService {
         stopWatch.stop();
         log.info("Saving playlist items in db took: {} ms",stopWatch.getLastTaskTimeMillis());
         eventPublisher.publishEvent(MovieUpdatedEvent.of(movieList));
+        return movieList;
     }
 
     public String getMovieTitle(String id) {

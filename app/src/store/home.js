@@ -4,11 +4,7 @@ const namespaced = true
 
 const actions = {
   createPlaylist({dispatch}, code) {
-    api.createPlaylist(code).then(
-      (response) => {
-        console.log(response)
-      }
-    )
+    return api.createPlaylist(code)
   }
 }
 

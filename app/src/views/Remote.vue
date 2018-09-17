@@ -49,6 +49,8 @@
                     this.ids.push({id: p.url, order: p.order, title: p.title});
                 })
             });
+
+            window.addEventListener('scroll', this.handleScroll);
         },
         data() {
             return {
@@ -61,6 +63,12 @@
             }
         },
         methods: {
+            handleScroll () {
+                var docHeight = document.documentElement.getBoundingClientRect().height
+                var winHeight = window.innerHeight;
+                var scrollPercent = (window.scrollY) / (docHeight - winHeight);
+                this.sendCommand('scroll-'+scrollPercent);
+            },
             initSSE() {
                 Vue.http.get("http://localhost:8080/api/codes/" + this.code + "/status")
                     .then(value => this.subscriptions = value.data.subscriptions);
@@ -70,8 +78,8 @@
                     let data = JSON.parse(event.data);
                     if (data.STATUS == 'CONNECTED') {
                         this.subscriptions++;
-                        this.sendCommand("volume-"+this.volumeSlider);
-                        this.sendCommand("switch-"+i);
+                        this.sendCommand("volume-" + this.volumeSlider);
+                        this.sendCommand("switch-" + i);
                     }
                     else if (data.STATUS == 'DISCONNECTED') {
                         this.subscriptions--;
@@ -102,11 +110,14 @@
             remove(value) {
                 Vue.http.delete(
                     "http://localhost:8080/api/codes/" + this.code + "/movies/" + value);
+                this.sendCommand("delete");
                 if (value === i % (this.ids.length)) {
                     i--;
                     this.ids.splice(value, 1);
                     this.reorder();
-                    this.next();
+                    this.switchTo({order: value});
+                    // this.next();
+                    // this.change();
                     return;
                 } else if (i > value) {
                     i--;
@@ -122,7 +133,7 @@
                     Vue.http.post(
                         "http://localhost:8080/api/codes/" + this.code + "/movies", {url: id}).then(p => {
                         p = p.body;
-                            this.ids.push({id: p.url, order: p.order, title: p.title});
+                        this.ids.push({id: p.url, order: p.order, title: p.title});
                     });
                 else if (playlistSplit[1]) {
                     Vue.http.post(
@@ -130,9 +141,11 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             }
-                        }).then(p => {
-                        p = p.body;
+                        }).then(k => {
+                        k = k.body;
+                        k.forEach(p => {
                             this.ids.push({id: p.url, order: p.order, title: p.title});
+                        })
                     });
                 }
                 this.newVideoInput = '';
@@ -158,7 +171,7 @@
                             }
                             this.ids.push({id: p.url, order: p.order, title: p.title});
                         });
-                        this.sendCommand('switch-'+i);
+                        this.sendCommand('switch-' + i);
                     });
 
                 })

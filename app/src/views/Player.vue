@@ -70,7 +70,8 @@
                                 outerThis.ids.splice(p.order, 1, {id: p.url, order: p.order, title: p.title});
                             });
                         else {
-                            switch (response.command) {
+                            var command = response.command.split('-')[0];
+                            switch (command) {
                                 case "next":
                                     outerThis.next();
                                     break;
@@ -83,13 +84,18 @@
                                 case "pause":
                                     outerThis.pause();
                                     break;
-                                case  /^volume/.test(response.command) && response.command:
+                                case "volume":
                                     outerThis.changeVolume(response.command.split('-')[1]);
                                     break;
-                                case /^switch/.test(response.command) && response.command:
+                                case "switch":
                                     if (outerThis.ids.length == 0) return;
                                     outerThis.switchTo({order:response.command.split('-')[1]});
                                     break;
+                                case "delete":
+                                    outerThis.remove(outerThis.ids.length-1);
+                                    break;
+                                case "scroll":
+                                    outerThis.scrollTo(response.command.split('-')[1]);
                             }
                         }
                     });
@@ -97,6 +103,11 @@
             },
             changeVolume(val) {
                 this.player.setVolume(val);
+            },
+            scrollTo(val) {
+                var docHeight = document.documentElement.getBoundingClientRect().height
+                var winHeight = window.innerHeight;
+                window.scrollTo(0, val * (docHeight - winHeight))
             },
             change() {
                 this.videoId = this.ids[(i % this.ids.length)].id;
