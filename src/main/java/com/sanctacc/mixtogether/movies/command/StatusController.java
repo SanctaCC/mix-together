@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.FluxSink;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 
@@ -33,6 +35,11 @@ public class StatusController {
     private final ExecutorSubscribableChannel brokerChannel;
     private final AbstractApplicationContext context;
     private final ApplicationEventMulticaster applicationEventMulticaster;
+
+    @ExceptionHandler(IOException.class)
+    public void ioHandler(Exception e) {
+        //
+    }
 
     @GetMapping("/api/codes/{code}/status")
     public ResponseEntity<?> getStatus(@PathVariable String code) {
