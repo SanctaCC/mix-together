@@ -18,12 +18,14 @@
         video id: {{videoId}}
         <br/> <h5 style="overflow: hidden">{{code}} </h5>
         <div class="playlist-wrapper">
-            <div class="btn-div" v-for="value in ids">
-                <button class="movie-btn" v-on:click="switchTo(value)" v-bind:class="{red: videoId == value.id}">
-                    {{ (value.title != undefined)? value.title : value.id}}
-                </button>
-                <button class="remove-btn" v-on:click="remove(ids.indexOf(value))">X</button>
-            </div>
+            <transition-group name="slide-fade">
+                <div :key="value.order" class="btn-div" v-for="value in ids">
+                    <button class="movie-btn" v-on:click="switchTo(value)" v-bind:class="{red: videoId == value.id}">
+                        {{ (value.title != undefined)? value.title : value.id}}
+                    </button>
+                    <button class="remove-btn" v-on:click="remove(ids.indexOf(value))">X</button>
+                </div>
+            </transition-group>
             <form @submit.prevent="addMovie()">
                 <input class="add-movie" v-model="newVideoInput" placeholder="youtube video or playlist url">
                 <button> add new</button>
@@ -38,6 +40,8 @@
 
     var i = 0;
     export default {
+        components: {
+        },
         name: "remote",
         created() {
             this.initSSE();
@@ -63,11 +67,11 @@
             }
         },
         methods: {
-            handleScroll () {
+            handleScroll() {
                 var docHeight = document.documentElement.getBoundingClientRect().height
                 var winHeight = window.innerHeight;
                 var scrollPercent = (window.scrollY) / (docHeight - winHeight);
-                this.sendCommand('scroll-'+scrollPercent);
+                this.sendCommand('scroll-' + scrollPercent);
             },
             initSSE() {
                 Vue.http.get("http://localhost:8080/api/codes/" + this.code + "/status")

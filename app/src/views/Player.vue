@@ -12,13 +12,16 @@
         video id: {{videoId}}
         <br/> <h5 style="overflow: hidden">{{code}} </h5>
         <div class="playlist-wrapper">
-            <div class="btn-div" v-for="value in ids">
-                <button class="movie-btn" v-on:click="switchTo(value)" v-bind:class="{red: videoId == value.id}">
-                    {{ (value.title != undefined)? value.title : value.id}}
-                </button>
-                <button class="remove-btn" v-on:click="remove(ids.indexOf(value))">X</button>
-            </div>
             <form @submit.prevent="addMovie()">
+                <transition-group name="slide-fade">
+                    <div :key="value.order" class="btn-div" v-for="value in ids">
+                        <button class="movie-btn" v-on:click="switchTo(value)"
+                                v-bind:class="{red: videoId == value.id}">
+                            {{ (value.title != undefined)? value.title : value.id}}
+                        </button>
+                        <button class="remove-btn" v-on:click="remove(ids.indexOf(value))">X</button>
+                    </div>
+                </transition-group>
                 <input class="add-movie" v-model="newVideoInput" placeholder="youtube video or playlist url">
                 <button> add new</button>
             </form>
@@ -89,10 +92,10 @@
                                     break;
                                 case "switch":
                                     if (outerThis.ids.length == 0) return;
-                                    outerThis.switchTo({order:response.command.split('-')[1]});
+                                    outerThis.switchTo({order: response.command.split('-')[1]});
                                     break;
                                 case "delete":
-                                    outerThis.remove(outerThis.ids.length-1);
+                                    outerThis.remove(outerThis.ids.length - 1);
                                     break;
                                 case "scroll":
                                     outerThis.scrollTo(response.command.split('-')[1]);
@@ -160,17 +163,19 @@
             addMovie() {
                 var id = this.$youtube.getIdFromUrl(this.newVideoInput);
                 var reg = /[&?]list=([^&]+)/i
-                var playlistId = (reg.exec(this.newVideoInput)[1]);
+                var playlistSplit = (reg.exec(this.newVideoInput));
                 if (id)
                     Vue.http.post(
-                        "http://localhost:8080/api/codes/" + this.code + "/movies", {url: id}).then(p => {});
-                else if (playlistId) {
+                        "http://localhost:8080/api/codes/" + this.code + "/movies", {url: id}).then(p => {
+                    });
+                else if (playlistSplit[1]) {
                     Vue.http.post(
-                        "http://localhost:8080/api/codes/" + this.code + "/movies?playlistId=" + playlistId, {params: {playlistId}}, {
+                        "http://localhost:8080/api/codes/" + this.code + "/movies?playlistId=" + playlistSplit[1], {
                             headers: {
                                 'Content-Type': 'application/json'
                             }
-                        }).then(p => {});
+                        }).then(p => {
+                    });
                 }
                 this.newVideoInput = '';
             },
@@ -229,5 +234,17 @@
     .ctrl-btn {
         width: 50%;
         min-height: 60px;
+    }
+
+    .slide-fade-enter-active {
+        transition: all .3s ease;
+    }
+    .slide-fade-leave-active {
+        transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    }
+    .slide-fade-enter, .slide-fade-leave-to
+        /* .slide-fade-leave-active below version 2.1.8 */ {
+        transform: translateX(10px);
+        opacity: 0;
     }
 </style>
