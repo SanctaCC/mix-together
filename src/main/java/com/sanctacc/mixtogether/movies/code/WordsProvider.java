@@ -33,7 +33,12 @@ public class WordsProvider {
     public List<String> randomize(int amount) {
         List<String> random = new ArrayList<>(amount);
         for (int i=0; i < amount; i++) {
-            random.add(words.get(ThreadLocalRandom.current().nextInt(0,words.size())));
+            String randomWord = words.get(ThreadLocalRandom.current().nextInt(0, words.size()));
+            if (random.contains(randomWord)) { //no duplicates
+                i--;
+                continue;
+            }
+            random.add(randomWord);
         }
         return random;
     }
